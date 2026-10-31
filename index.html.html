@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Website QR - GitHub Pages</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{--bg:#0b1220;--panel:#172338;--panel2:#26364e;--blue:#2563eb;--text:#f8fafc;--muted:#94a3b8;--green:#4ade80}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
+header{position:sticky;top:0;z-index:5;background:#111d32;padding:12px 16px;box-shadow:0 5px 20px #0004}
+.brand{text-align:center;font-weight:bold;font-size:18px;margin:3px 0 12px}
+nav{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+nav button,.btn{border:0;border-radius:8px;padding:11px 16px;background:#334155;color:white;cursor:pointer;font-size:14px}
+nav button.active,.btn.primary{background:var(--blue)}
+nav button:hover,.btn:hover{filter:brightness(1.12)}
+main{width:min(920px,calc(100% - 28px));margin:24px auto 40px}
+.page{display:none;background:var(--panel);padding:24px;border-radius:16px;box-shadow:0 12px 35px #0004}
+.page.active{display:block}
+h1{font-size:24px;margin:0 0 8px}
+h2{font-size:19px;margin:22px 0 10px}
+p{color:#cbd5e1;line-height:1.6}
+.muted{color:var(--muted)}
+.status{padding:12px;border-radius:8px;background:var(--panel2);color:#a5b4fc;font-size:14px;margin:16px 0}
+.url{padding:13px;background:var(--bg);border-radius:8px;overflow-wrap:anywhere;color:#60a5fa;margin:8px 0 16px}
+.qr{background:white;border-radius:12px;padding:15px;width:fit-content;max-width:100%;margin:20px auto;min-height:0}
+.qr img,.qr canvas{display:block;max-width:100%;height:auto}
+.actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.actions .btn{width:100%;margin:0}
+label{display:block;margin:16px 0 7px;color:#cbd5e1}
+input{width:100%;padding:12px;border:1px solid #475569;border-radius:8px;background:#0b1220;color:white;font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.card{padding:16px;border-radius:10px;background:#22324a;min-width:0}
+.card strong{display:block;margin-bottom:7px}
+.info{padding:13px;background:var(--bg);border-radius:8px;overflow-wrap:anywhere;color:#60a5fa;margin:8px 0 16px}
+.controls{display:flex;justify-content:space-between;gap:10px;margin-top:20px}
+.controls button:disabled{opacity:.4;cursor:not-allowed}
+small{display:block;color:var(--muted);line-height:1.6;margin-top:15px}
+@media(max-width:520px){.page{padding:18px}nav{gap:5px}nav button{padding:9px 11px;font-size:12px}.brand{font-size:16px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">🌐 My Website QR</div>
+  <nav aria-label="Page navigation">
+    <button class="active" data-page="0" onclick="showPage(0)">QR Code</button>
+    <button data-page="1" onclick="showPage(1)">How to Use</button>
+    <button data-page="2" onclick="showPage(2)">Website Info</button>
+    <button data-page="3" onclick="showPage(3)">Settings</button>
+  </nav>
+</header>
+
+<main>
+  <section class="page active" aria-label="Website QR code">
+    <h1>Permanent Website QR</h1>
+    <p class="muted">This QR code points to this website's address. After publishing on GitHub Pages, scan it to open your website from anywhere.</p>
+    <div class="status" id="status" role="status">Preparing QR code…</div>
+    <div class="muted">WEBSITE ADDRESS</div>
+    <div class="url" id="websiteURL">Detecting current address…</div>
+    <div class="qr" id="qrcode" aria-label="Website QR code"></div>
+    <div class="actions">
+      <button class="btn primary" onclick="generateQR()">↻ Refresh QR Code</button>
+      <button class="btn primary" onclick="downloadQR()">↓ Download QR PNG</button>
+      <button class="btn" onclick="copyURL()">Copy Website URL</button>
+    </div>
+    <small>The QR code uses the published website URL, not your Android public IP. It remains valid as long as you keep the same GitHub Pages address.</small>
+  </section>
+
+  <section class="page" aria-label="How to use">
+    <h1>Publish and Share</h1>
+    <div class="grid">
+      <div class="card"><strong>1. Upload to GitHub</strong><p>Upload this file to your repository and name it <b>index.html</b>.</p></div>
+      <div class="card"><strong>2. Enable GitHub Pages</strong><p>In repository Settings → Pages, choose Deploy from a branch, then select <b>main</b> and <b>/(root)</b>.</p></div>
+      <div class="card"><strong>3. Open the published site</strong><p>Wait for deployment, then open your GitHub Pages address. It usually looks like <b>https://username.github.io/repository/</b>.</p></div>
+      <div class="card"><strong>4. Share the QR code</strong><p>Download the QR PNG on Page 1 and share it. Anyone with the link can visit your public site.</p></div>
+    </div>
+    <div class="status">GitHub Pages hosts static files. It does not run a Python server or expose an HTTP server running on your Android phone.</div>
+  </section>
+
+  <section class="page" aria-label="Website information">
+    <h1>Website Information</h1>
+    <p class="muted">Information about the current page and QR destination.</p>
+    <div class="grid">
+      <div class="card"><strong>Hosting</strong><div class="info">GitHub Pages (static hosting)</div></div>
+      <div class="card"><strong>Current page address</strong><div class="info" id="infoCurrent">Not available</div></div>
+      <div class="card"><strong>QR destination</strong><div class="info" id="infoTarget">Not available</div></div>
+      <div class="card"><strong>Connection</strong><div class="info" id="infoProtocol">Not available</div></div>
+    </div>
+    <button class="btn primary" onclick="useCurrentAddress()">Use current website address</button>
+  </section>
+
+  <section class="page" aria-label="Settings">
+    <h1>QR Settings</h1>
+    <p class="muted">Normally, the QR destination is detected automatically from the published website address. You can also enter a different URL.</p>
+    <label for="targetInput">QR destination URL</label>
+    <input id="targetInput" type="url" placeholder="https://username.github.io/repository/">
+    <div class="actions" style="margin-top:18px">
+      <button class="btn primary" onclick="applyCustomURL()">Apply URL</button>
+      <button class="btn" onclick="useCurrentAddress()">Reset to this website</button>
+    </div>
+    <div class="status" id="settingsStatus">QR destination follows the current website address.</div>
+    <small>Enter a complete address beginning with https://. The QR code only stores the link; it does not create or host the destination website.</small>
+  </section>
+
+  <div class="controls">
+    <button class="btn" id="prevBtn" onclick="movePage(-1)" disabled>← Previous</button>
+    <span class="muted" id="pageCount" style="align-self:center">Page 1 of 4</span>
+    <button class="btn primary" id="nextBtn" onclick="movePage(1)">Next →</button>
+  </div>
+</main>
+
+<script>
+let currentPage=0;
+let qrTarget="";
+let qrReady=false;
+
+function showPage(index){
+  const pages=[...document.querySelectorAll(".page")];
+  const buttons=[...document.querySelectorAll("nav button")];
+  if(index<0||index>=pages.length)return;
+  currentPage=index;
+  pages.forEach((p,i)=>p.classList.toggle("active",i===index));
+  buttons.forEach((b,i)=>{
+    b.classList.toggle("active",i===index);
+    b.setAttribute("aria-current",i===index?"page":"false");
+  });
+  document.getElementById("prevBtn").disabled=index===0;
+  document.getElementById("nextBtn").disabled=index===pages.length-1;
+  document.getElementById("pageCount").textContent=`Page ${index+1} of ${pages.length}`;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function movePage(direction){showPage(currentPage+direction)}
+
+function getCurrentWebsiteURL(){
+  // Remove query string and fragment so the QR points to the stable page URL.
+  return window.location.origin + window.location.pathname;
+}
+function updateDisplayedURL(){
+  document.getElementById("websiteURL").textContent=qrTarget||"No URL selected";
+  document.getElementById("infoCurrent").textContent=getCurrentWebsiteURL();
+  document.getElementById("infoTarget").textContent=qrTarget||"No URL selected";
+  document.getElementById("infoProtocol").textContent=location.protocol;
+  document.getElementById("targetInput").value=qrTarget;
+}
+function generateQR(){
+  const status=document.getElementById("status");
+  const target=document.getElementById("qrcode");
+  if(!qrTarget)qrTarget=getCurrentWebsiteURL();
+  target.innerHTML="";
+  qrReady=false;
+  updateDisplayedURL();
+  if(!/^https?:\/\//i.test(qrTarget)){
+    status.textContent="⚠ Enter a valid http:// or https:// URL.";
+    return;
+  }
+  if(typeof QRCode==="undefined"){
+    status.textContent="⚠ QR library did not load. Check your internet connection and reload this page.";
+    return;
+  }
+  try{
+    new QRCode(target,{text:qrTarget,width:240,height:240,colorDark:"#000000",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.H});
+    qrReady=true;
+    status.textContent="✓ QR code generated successfully.";
+  }catch(error){
+    status.textContent="⚠ Could not generate QR code: "+error.message;
+  }
+}
+function applyCustomURL(){
+  const value=document.getElementById("targetInput").value.trim();
+  if(!/^https?:\/\/[^ ]+/i.test(value)){
+    document.getElementById("settingsStatus").textContent="Enter a valid complete URL beginning with https:// or http://.";
+    return;
+  }
+  qrTarget=value;
+  generateQR();
+  document.getElementById("settingsStatus").textContent="Custom QR destination applied.";
+  showPage(0);
+}
+function useCurrentAddress(){
+  qrTarget=getCurrentWebsiteURL();
+  generateQR();
+  document.getElementById("settingsStatus").textContent="Using this website's current address.";
+}
+function downloadQR(){
+  if(!qrReady){alert("QR code is not ready. Check the status message.");return}
+  const target=document.getElementById("qrcode");
+  const canvas=target.querySelector("canvas");
+  const img=target.querySelector("img");
+  let dataURL="";
+  if(canvas)dataURL=canvas.toDataURL("image/png");
+  else if(img)dataURL=img.src;
+  if(!dataURL){alert("QR image is unavailable.");return}
+  const link=document.createElement("a");
+  link.href=dataURL;
+  link.download="website-QR.png";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+}
+async function copyURL(){
+  if(!qrTarget){alert("No website URL is available.");return}
+  try{
+    await navigator.clipboard.writeText(qrTarget);
+    alert("Website URL copied.");
+  }catch(error){
+    window.prompt("Copy this website URL:",qrTarget);
+  }
+}
+document.addEventListener("keydown",e=>{
+  if(e.target.matches("input,textarea"))return;
+  if(e.key==="ArrowRight")movePage(1);
+  if(e.key==="ArrowLeft")movePage(-1);
+});
+qrTarget=getCurrentWebsiteURL();
+generateQR();
+</script>
+</body>
+</html>
